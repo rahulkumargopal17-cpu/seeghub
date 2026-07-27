@@ -351,7 +351,10 @@
 
 <nav>
   <div class="nav-logo">SeeG<span>Hub</span></div>
-  <div class="nav-badge">Coming Soon</div>
+  <div style="display:flex; align-items:center; gap:1rem;">
+    <a href="demo.html" style="font-size:0.85rem; color:var(--muted); text-decoration:none; transition:color 0.15s;" onmouseover="this.style.color='var(--white)'" onmouseout="this.style.color='var(--muted)'">Try the Demo</a>
+    <div class="nav-badge">Coming Soon</div>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -368,7 +371,7 @@
       <button class="btn-gold" onclick="signup('hero')">Get Early Access</button>
     </div>
     <div class="success-msg" id="hero-success">✓ &nbsp;You're on the list. We'll be in touch.</div>
-    <p class="form-note" style="margin-top:0.6rem;">No spam. Just early access when we open the doors.</p>
+    <p class="form-note" style="margin-top:0.6rem;">No spam. Just early access when we open the doors. &nbsp;·&nbsp; <a href="demo.html" style="color:var(--gold); text-decoration:none;">Try the demo →</a></p>
 
     <div class="proof-strip">
       <p class="proof-text">We're building this from the ground up. <strong>Your email gets you in first.</strong></p>

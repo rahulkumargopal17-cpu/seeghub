@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SeeGHub — Demo</title>
+<meta name="description" content="A preview of the SeeGHub feed — showcase, discussion, and collaboration posts, voting, comments, and a library view.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0A0F;
+    --panel: #13131A;
+    --panel2: #1C1C27;
+    --white: #F5F3EF;
+    --muted: #6E6C80;
+    --gold: #F5A623;
+    --teal: #2EC4B6;
+    --coral: #E05C5C;
+    --purple: #7B61FF;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 2rem;
+    background: rgba(10,10,15,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.35rem; font-weight: 900; color: var(--white); text-decoration: none; }
+  .nav-logo span { color: var(--gold); }
+  .nav-badge {
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--bg);
+    background: var(--gold); padding: 0.22rem 0.65rem; border-radius: 2rem;
+  }
+  .nav-right { display: flex; align-items: center; gap: 1rem; }
+  .nav-link { font-size: 0.85rem; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+  .nav-link:hover { color: var(--white); }
+
+  main { max-width: 720px; margin: 0 auto; padding: 6.5rem 1.5rem 4rem; }
+
+  .demo-eyebrow {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--gold);
+    margin-bottom: 0.75rem;
+  }
+  .demo-eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--gold); }
+  .demo-title { font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 700; margin-bottom: 0.5rem; }
+  .demo-sub { color: var(--muted); font-size: 0.92rem; line-height: 1.6; margin-bottom: 2rem; max-width: 560px; }
+
+  .bar-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+  .pill-row { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .pill {
+    font-size: 0.78rem; font-weight: 600; padding: 0.4rem 0.85rem;
+    border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1);
+    background: var(--panel); color: var(--muted);
+    cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  }
+  .pill.active { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+  .pill:hover:not(.active) { color: var(--white); border-color: rgba(255,255,255,0.2); }
+
+  .signup-btn {
+    background: var(--gold); color: var(--bg); border: none; border-radius: 0.5rem;
+    padding: 0.55rem 1.1rem; font-size: 0.82rem; font-weight: 700;
+    font-family: 'Inter', sans-serif; cursor: pointer; transition: opacity 0.15s;
+  }
+  .signup-btn:hover { opacity: 0.87; }
+
+  .feed { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .post-card {
+    display: flex; gap: 0.9rem;
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 0.9rem; padding: 1.1rem 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .post-card:hover { border-color: rgba(245,166,35,0.2); }
+
+  .vote-col { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 26px; user-select: none; }
+  .vote-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.9rem; padding: 2px; line-height: 1; transition: color 0.15s; }
+  .vote-btn:hover { color: var(--white); }
+  .vote-btn.up.active { color: var(--gold); }
+  .vote-btn.down.active { color: var(--coral); }
+  .vote-score { font-size: 0.85rem; font-weight: 700; }
+
+  .post-main { flex: 1; min-width: 0; }
+  .badge-row { display: flex; gap: 0.4rem; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; }
+  .type-badge { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.15rem 0.55rem; border-radius: 2rem; border: 1px solid; }
+  .type-showcase { color: var(--teal); border-color: rgba(46,196,182,0.4); background: rgba(46,196,182,0.08); }
+  .type-discussion { color: var(--purple); border-color: rgba(123,97,255,0.4); background: rgba(123,97,255,0.08); }
+  .type-collab { color: var(--coral); border-color: rgba(224,92,92,0.4); background: rgba(224,92,92,0.08); }
+  .lib-badge { color: var(--gold); border-color: rgba(245,166,35,0.4); background: rgba(245,166,35,0.08); }
+  .post-author { font-size: 0.72rem; color: var(--muted); }
+
+  .post-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.02rem; margin-bottom: 0.35rem; line-height: 1.3; }
+  .post-body { font-size: 0.85rem; color: var(--muted); line-height: 1.55; margin-bottom: 0.65rem; }
+
+  .tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.65rem; }
+  .tag { font-size: 0.68rem; padding: 0.15rem 0.55rem; border-radius: 2rem; background: var(--panel2); color: var(--muted); }
+
+  .comment-toggle { font-size: 0.75rem; color: var(--muted); background: none; border: none; cursor: pointer; padding: 0; transition: color 0.15s; }
+  .comment-toggle:hover { color: var(--white); }
+  .comment-box { margin-top: 0.65rem; padding-top: 0.65rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 0.5rem; }
+  .comment-line { font-size: 0.8rem; color: var(--muted); padding-left: 0.6rem; border-left: 2px solid rgba(255,255,255,0.1); line-height: 1.5; }
+
+  .empty-msg { color: var(--muted); font-size: 0.88rem; padding: 2rem 0; text-align: center; }
+
+  .demo-note {
+    margin-top: 2.5rem; padding: 1rem 1.25rem; background: var(--panel);
+    border: 1px solid rgba(245,166,35,0.2); border-radius: 0.75rem;
+    font-size: 0.8rem; color: var(--muted); line-height: 1.6;
+  }
+  .demo-note strong { color: var(--white); }
+
+  /* modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center; z-index: 200; padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--panel); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem; padding: 1.75rem; width: 100%; max-width: 340px;
+  }
+  .modal-title { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.15rem; margin-bottom: 1.1rem; }
+  .modal-box input {
+    width: 100%; background: var(--bg); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 0.5rem; padding: 0.7rem 0.9rem; font-size: 0.85rem;
+    color: var(--white); font-family: 'Inter', sans-serif; margin-bottom: 0.65rem; outline: none;
+  }
+  .modal-box input:focus { border-color: rgba(245,166,35,0.45); }
+  .modal-box input::placeholder { color: var(--muted); }
+  .modal-demo-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.6rem; display: none; }
+  .modal-close { position: absolute; top: 1rem; right: 1.1rem; background: none; border: none; color: var(--muted); font-size: 1rem; cursor: pointer; }
+  .modal-box { position: relative; }
+
+  footer {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 1.75rem 2.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 1rem;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .footer-logo { font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.1rem; }
+  .footer-logo span { color: var(--gold); }
+  .footer-note { font-size: 0.75rem; color: var(--muted); }
+
+  @media (max-width: 600px) {
+    nav { padding: 0.85rem 1.25rem; }
+    main { padding: 6rem 1.1rem 3rem; }
+    footer { padding: 1.5rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">SeeG<span>Hub</span></a>
+  <div class="nav-right">
+    <span class="nav-badge">Demo Preview</span>
+    <a href="index.html" class="nav-link">← Back to SeeGHub.com</a>
+  </div>
+</nav>
+
+<main>
+  <p class="demo-eyebrow">See It Generated</p>
+  <h1 class="demo-title">A look at the feed.</h1>
+  <p class="demo-sub">
+    This is a working preview — vote, open comments, filter by type, browse the Library.
+    Nothing here is saved or persisted; it's here so you can feel what SeeGHub is before it's live.
+  </p>
+
+  <div class="bar-row">
+    <div class="pill-row" id="topTabs"></div>
+    <button class="signup-btn" id="signupBtn">Sign up</button>
+  </div>
+
+  <div class="bar-row" id="subBar">
+    <div class="pill-row" id="typeTabs"></div>
+    <div class="pill-row" id="sortTabs"></div>
+  </div>
+
+  <div class="feed" id="feed"></div>
+
+  <div class="demo-note">
+    <strong>This is a demo, not a live product.</strong> Posts, votes, and comments reset if you reload —
+    nothing is stored on a server. When SeeGHub opens for real, this is the shape it'll take.
+  </div>
+</main>
+
+<footer>
+  <div class="footer-logo">SeeG<span>Hub</span></div>
+  <div class="footer-note">SeeGHub.com &nbsp;·&nbsp; See It Generated &nbsp;·&nbsp; &copy; 2026</div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+    <div class="modal-title">Join SeeGHub</div>
+    <input type="text" placeholder="Username">
+    <input type="email" placeholder="name@email.com">
+    <input type="password" placeholder="Password">
+    <button class="signup-btn" style="width:100%;" id="fakeCreate">Create account</button>
+    <div class="modal-demo-note" id="demoNote">This is a demo preview — no account is actually created.</div>
+  </div>
+</div>
+
+<script>
+const POSTS = [
+  {id:1, type:'showcase', title:'Neon rain chase — full breakdown', author:'foxfur_films', body:'Kling for the base plate, Runway for the reflections pass, ElevenLabs for the engine growl. Prompts and camera notes below.', tags:['Kling','Runway','ElevenLabs'], score:34, comments:['Reflections pass looks so clean, what was the camera prompt?','This is exactly the kind of breakdown I never find anywhere.'], library:true},
+  {id:2, type:'showcase', title:'60-second sci-fi teaser, single prompt chain', author:'alpha_creates', body:'No process notes yet — just the clip.', tags:['Sora','text-to-video'], score:19, comments:['Quick post but the pacing is great.']},
+  {id:3, type:'discussion', title:'Best workflow for consistent character faces across shots?', author:'moon_render', body:'Losing face consistency past shot 3 even with a reference image. What is actually working for people right now?', tags:['consistency','workflow'], score:27, comments:['Locking seed + reusing the same reference image on every shot helps a lot.','Try a LoRA on the character if your tool supports it.']},
+  {id:4, type:'discussion', title:'Kling vs Runway for camera moves — anyone compared head to head?', author:'devon_ai', body:'Specifically dolly and orbit shots on a static subject.', tags:['Kling','Runway'], score:12, comments:[]},
+  {id:5, type:'collab', title:'Need a voice actor — noir short, 3 lines, moody', author:'nightreel', body:'Detective voiceover, ~20 seconds total. Can pay or credit-share.', tags:['voice actor','paid'], score:8, comments:['Sent you a DM with a sample.']},
+  {id:6, type:'collab', title:'Looking for an editor who knows AI upscaling', author:'grainhouse', body:'Premiere-based, comfortable cleaning up video-model artifacts.', tags:['editor','premiere'], score:6, comments:[]},
+  {id:7, type:'showcase', title:'How image-to-video actually works, step by step', author:'alpha_creates', body:'A beginner-friendly breakdown of the img-to-video pipeline, from reference frame to final motion pass.', tags:['image-to-video','tutorial'], score:52, comments:['Bookmarking this, exactly what I needed on day one.','This should be pinned honestly.'], library:true},
+];
+
+const labelFor = { showcase: 'Showcase', discussion: 'Discussion', collab: 'Collab' };
+
+let view = 'feed';
+let typeFilter = 'all';
+let sort = 'new';
+let voteState = {};
+let openComments = {};
+
+function makePill(text, active, onClick) {
+  const b = document.createElement('button');
+  b.className = 'pill' + (active ? ' active' : '');
+  b.textContent = text;
+  b.onclick = onClick;
+  return b;
+}
+
+function renderTabs() {
+  const top = document.getElementById('topTabs');
+  top.innerHTML = '';
+  top.appendChild(makePill('Feed', view === 'feed', () => { view = 'feed'; renderAll(); }));
+  top.appendChild(makePill('Library', view === 'library', () => { view = 'library'; renderAll(); }));
+
+  const subBar = document.getElementById('subBar');
+  subBar.style.display = view === 'feed' ? 'flex' : 'none';
+
+  const typeTabs = document.getElementById('typeTabs');
+  typeTabs.innerHTML = '';
+  [['all','All'],['showcase','Showcase'],['discussion','Discussion'],['collab','Collab']].forEach(([v,l]) => {
+    typeTabs.appendChild(makePill(l, typeFilter === v, () => { typeFilter = v; renderAll(); }));
+  });
+
+  const sortTabs = document.getElementById('sortTabs');
+  sortTabs.innerHTML = '';
+  [['new','New'],['top','Top']].forEach(([v,l]) => {
+    sortTabs.appendChild(makePill(l, sort === v, () => { sort = v; renderAll(); }));
+  });
+}
+
+function scoreOf(p) { return p.score + (voteState[p.id] || 0); }
+
+function renderCard(p) {
+  const card = document.createElement('div');
+  card.className = 'post-card';
+
+  const voteCol = document.createElement('div');
+  voteCol.className = 'vote-col';
+  const upBtn = document.createElement('button');
+  upBtn.className = 'vote-btn up' + (voteState[p.id] === 1 ? ' active' : '');
+  upBtn.textContent = '▲';
+  upBtn.setAttribute('aria-label', 'Upvote');
+  const scoreEl = document.createElement('div');
+  scoreEl.className = 'vote-score';
+  scoreEl.textContent = scoreOf(p);
+  const downBtn = document.createElement('button');
+  downBtn.className = 'vote-btn down' + (voteState[p.id] === -1 ? ' active' : '');
+  downBtn.textContent = '▼';
+  downBtn.setAttribute('aria-label', 'Downvote');
+
+  upBtn.onclick = () => { voteState[p.id] = voteState[p.id] === 1 ? 0 : 1; renderFeed(); };
+  downBtn.onclick = () => { voteState[p.id] = voteState[p.id] === -1 ? 0 : -1; renderFeed(); };
+
+  voteCol.append(upBtn, scoreEl, downBtn);
+
+  const main = document.createElement('div');
+  main.className = 'post-main';
+
+  const badgeRow = document.createElement('div');
+  badgeRow.className = 'badge-row';
+  const badge = document.createElement('span');
+  badge.className = 'type-badge type-' + p.type;
+  badge.textContent = labelFor[p.type];
+  badgeRow.appendChild(badge);
+  if (p.library) {
+    const lib = document.createElement('span');
+    lib.className = 'type-badge lib-badge';
+    lib.textContent = 'Library';
+    badgeRow.appendChild(lib);
+  }
+  const author = document.createElement('span');
+  author.className = 'post-author';
+  author.textContent = 'by @' + p.author;
+  badgeRow.appendChild(author);
+  main.appendChild(badgeRow);
+
+  const title = document.createElement('div');
+  title.className = 'post-title';
+  title.textContent = p.title;
+  main.appendChild(title);
+
+  const body = document.createElement('div');
+  body.className = 'post-body';
+  body.textContent = p.body;
+  main.appendChild(body);
+
+  if (p.tags && p.tags.length) {
+    const tagRow = document.createElement('div');
+    tagRow.className = 'tag-row';
+    p.tags.forEach(t => {
+      const tag = document.createElement('span');
+      tag.className = 'tag';
+      tag.textContent = t;
+      tagRow.appendChild(tag);
+    });
+    main.appendChild(tagRow);
+  }
+
+  const commentToggle = document.createElement('button');
+  commentToggle.className = 'comment-toggle';
+  commentToggle.textContent = p.comments.length + ' comments';
+  main.appendChild(commentToggle);
+
+  const commentBox = document.createElement('div');
+  commentBox.className = 'comment-box';
+  commentBox.style.display = openComments[p.id] ? 'flex' : 'none';
+  if (p.comments.length === 0) {
+    const none = document.createElement('div');
+    none.className = 'comment-line';
+    none.textContent = 'No comments yet.';
+    commentBox.appendChild(none);
+  } else {
+    p.comments.forEach(c => {
+      const line = document.createElement('div');
+      line.className = 'comment-line';
+      line.textContent = c;
+      commentBox.appendChild(line);
+    });
+  }
+  main.appendChild(commentBox);
+
+  commentToggle.onclick = () => { openComments[p.id] = !openComments[p.id]; renderFeed(); };
+
+  card.append(voteCol, main);
+  return card;
+}
+
+function renderFeed() {
+  const container = document.getElementById('feed');
+  container.innerHTML = '';
+
+  let list = POSTS.slice();
+  if (view === 'library') {
+    list = list.filter(p => p.library);
+  } else if (typeFilter !== 'all') {
+    list = list.filter(p => p.type === typeFilter);
+  }
+
+  if (sort === 'top') list.sort((a, b) => scoreOf(b) - scoreOf(a));
+  else list.sort((a, b) => b.id - a.id);
+
+  if (list.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-msg';
+    empty.textContent = 'Nothing here yet.';
+    container.appendChild(empty);
+    return;
+  }
+
+  list.forEach(p => container.appendChild(renderCard(p)));
+}
+
+function renderAll() { renderTabs(); renderFeed(); }
+
+const overlay = document.getElementById('modalOverlay');
+document.getElementById('signupBtn').onclick = () => overlay.classList.add('open');
+document.getElementById('modalClose').onclick = () => overlay.classList.remove('open');
+overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('open'); });
+document.getElementById('fakeCreate').onclick = (e) => {
+  e.preventDefault();
+  document.getElementById('demoNote').style.display = 'block';
+};
+
+renderAll();
+</script>
+</body>
+</html>

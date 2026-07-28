@@ -233,6 +233,8 @@
     <button class="side-item active" data-view="feed">Feed</button>
     <button class="side-item" data-view="library">Library</button>
     <button class="side-item" data-view="contest">Contest <span class="soon-tag">Soon</span></button>
+    <button class="side-item" data-view="hire">Hire <span class="soon-tag">Soon</span></button>
+    <button class="side-item" data-view="marketplace">Marketplace <span class="soon-tag">Soon</span></button>
   </aside>
 
   <main class="content">
@@ -263,7 +265,43 @@
         a "Wordle for AI filmmakers" — but humans vote and critique. That's a deliberate choice:
         algorithmic scoring of subjective creative work doesn't hold up, credibility-wise.
       </p>
+
+      <div class="pill-row" id="contestTabs" style="margin: 1.1rem 0 0.9rem;"></div>
+      <div id="contestTabContent"></div>
+
       <p>This opens once Feed and Library have real, sustained activity behind them.</p>
+    </div>
+
+    <div class="contest-panel" id="hirePanel" style="display:none;">
+      <span class="contest-tag">Coming in v3</span>
+      <h2>Hire</h2>
+      <p>
+        Every creator on SeeGHub builds a real, visible body of work here: posts, process
+        breakdowns, and a reputation earned through actual community feedback, not a polished
+        portfolio link. Hire is where that becomes a way to get hired.
+      </p>
+      <p>
+        Post a project, and browse creators by the tools and techniques they've actually
+        demonstrated in their Showcase history. You're not hiring a resume, you're hiring
+        someone whose work you've already seen.
+      </p>
+      <p>This opens once the Collaboration board has real density behind it.</p>
+    </div>
+
+    <div class="contest-panel" id="marketplacePanel" style="display:none;">
+      <span class="contest-tag">Coming in v3</span>
+      <h2>Marketplace</h2>
+      <p>
+        Once enough creators are organized in one place, that's real leverage. Marketplace is
+        where SeeGHub negotiates community discounts directly with AI tool companies, Runway,
+        Kling, ElevenLabs, and more, so the whole community creates more for less.
+      </p>
+      <p>
+        This is the same idea behind our sponsored competitions, just pointed at your everyday
+        toolkit instead of a contest: community density becomes leverage with the tool makers
+        themselves.
+      </p>
+      <p>We use these discounts to help bring SeeGHub to more creators in the first place, not just as a perk for sticking around.</p>
     </div>
 
     <div class="demo-note">
@@ -307,6 +345,8 @@ const PAGE_COPY = {
   feed: { title: 'A look at the feed.', sub: "This is a working preview — vote, open comments, filter by type, browse the Library. Nothing here is saved or persisted; it's here so you can feel what SeeGHub is before it's live." },
   library: { title: 'The library.', sub: 'The best breakdowns and tutorials, kept visible regardless of age — pulled out of the feed, not buried by it.' },
   contest: { title: 'Compete + Earn.', sub: "Not live yet, and deliberately so — competitions come once Feed and Library have a real habit behind them." },
+  hire: { title: 'Hire.', sub: "Not live yet — a marketplace for hiring creators works best once there's real work behind every profile." },
+  marketplace: { title: 'Marketplace.', sub: "Not live yet — tool discounts we can use to help grow SeeGHub, not just reward people already here." },
 };
 
 let view = 'feed';
@@ -449,13 +489,63 @@ function renderCard(p) {
   return card;
 }
 
+const TEASER_VIEWS = ['contest', 'hire', 'marketplace'];
+const TEASER_PANEL_IDS = { contest: 'contestPanel', hire: 'hirePanel', marketplace: 'marketplacePanel' };
+
+const CONTEST_CADENCE = {
+  weekly: {
+    label: 'Weekly',
+    tag: 'Low stakes, high frequency',
+    body: "A fast, lightweight challenge every week. AI drops a constraint, a shot type, a technique, a genre twist, and you post your take. Community votes. Top entries get a credit boost and featured placement in that week's Library. This is the on-ramp: quick enough that showing up weekly becomes a habit, not a commitment."
+  },
+  monthly: {
+    label: 'Monthly',
+    tag: 'Community-run and voted',
+    body: "A bigger, themed contest each month, still fully community-run and community-voted, no outside judges. Real recognition on the line: winner badges, a bigger credit reward, and a guaranteed spot in that month's Library highlights."
+  },
+  quarterly: {
+    label: 'Quarterly',
+    tag: 'The big show',
+    body: "The flagship event, sponsored by AI tool makers and brand partners. Judged by a mix of community votes and invited experts, art directors, industry pros, with real prizes and real ratings and reviews. This is where sponsorships and the wider industry meet the community directly."
+  },
+};
+
+let contestTab = 'monthly';
+
+function renderContestTabs() {
+  const tabsEl = document.getElementById('contestTabs');
+  const contentEl = document.getElementById('contestTabContent');
+  if (!tabsEl || !contentEl) return;
+
+  tabsEl.innerHTML = '';
+  Object.keys(CONTEST_CADENCE).forEach(key => {
+    tabsEl.appendChild(makePill(CONTEST_CADENCE[key].label, contestTab === key, () => {
+      contestTab = key;
+      renderContestTabs();
+    }));
+  });
+
+  const c = CONTEST_CADENCE[contestTab];
+  contentEl.innerHTML = '';
+  const tagEl = document.createElement('div');
+  tagEl.textContent = c.tag;
+  tagEl.style.cssText = 'font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--gold); margin-bottom:0.4rem;';
+  const bodyEl = document.createElement('p');
+  bodyEl.textContent = c.body;
+  bodyEl.style.cssText = 'margin-bottom:0;';
+  contentEl.append(tagEl, bodyEl);
+}
+
 function renderFeed() {
   const container = document.getElementById('feed');
-  const contestPanel = document.getElementById('contestPanel');
+  const isTeaser = TEASER_VIEWS.includes(view);
 
-  container.style.display = view === 'contest' ? 'none' : 'flex';
-  contestPanel.style.display = view === 'contest' ? 'block' : 'none';
-  if (view === 'contest') return;
+  container.style.display = isTeaser ? 'none' : 'flex';
+  TEASER_VIEWS.forEach(v => {
+    document.getElementById(TEASER_PANEL_IDS[v]).style.display = (view === v) ? 'block' : 'none';
+  });
+  if (view === 'contest') renderContestTabs();
+  if (isTeaser) return;
 
   container.innerHTML = '';
 
